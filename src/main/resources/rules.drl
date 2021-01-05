@@ -1,0 +1,70 @@
+import com.shiva.truckerapi.entity.Readings;
+import com.shiva.truckerapi.entity.Alert;
+
+global com.shiva.truckerapi.entity.Vehicle vehicle;
+
+global java.util.List alertList;
+
+rule "Engine Coolant LOW Or Check Engine Light ON"
+
+when
+readingsObject: Readings(engineCoolantLow || checkEngineLightOn);
+then
+Alert $alert = new Alert();
+$alert.setAdded(true);
+$alert.setVin(readingsObject.getVin());
+$alert.setPriority("LOW");
+$alert.setDescription("Engine Coolant LOW Or Check Engine Light ON");
+$alert.setTimestamp(readingsObject.getTimestamp());
+$alert.setLatitude(readingsObject.getLatitude());
+$alert.setLongitude(readingsObject.getLongitude());
+alertList.add($alert);
+end;
+
+	rule "Any Tire Pressure Less than 32psi or Greater than 36 psi"
+
+	when
+	readingsObject: Readings((Tires.getFrontLeft < 32 || Tires.getFrontLeft > 36) || (Tires.getFrontRight < 32 || Tires.getFrontRight > 36) || (Tires.getRearLeft < 32 || Tires.getRearLeft > 36) || (Tires.getRearRight < 32 || Tires.getRearRight > 36));
+	then
+	Alert $alert = new Alert();
+	$alert.setAdded(true);
+	$alert.setVin(readingsObject.getVin());
+	$alert.setPriority("LOW");
+	$alert.setDescription("Tire Pressure");
+	$alert.setTimestamp(readingsObject.getTimestamp());
+	$alert.setLatitude(readingsObject.getLatitude());
+	$alert.setLongitude(readingsObject.getLongitude());
+	alertList.add($alert);
+	end;
+
+	rule "Engine Rpm Greater than Redline Rpm"
+
+	when
+	readingsObject: Readings(engineRpm > vehicle.getRedlineRpm());
+	then
+	Alert $alert = new Alert();
+	$alert.setAdded(true);
+	$alert.setVin(readingsObject.getVin());
+	$alert.setPriority("HIGH");
+	$alert.setDescription("Engine RPM greater than Redline RPM");
+	$alert.setTimestamp(readingsObject.getTimestamp());
+	$alert.setLatitude(readingsObject.getLatitude());
+	$alert.setLongitude(readingsObject.getLongitude());
+	alertList.add($alert);
+	end;
+
+	rule "Fuel volume less than 10 percent of max fuel volume"
+
+	when
+	readingsObject: Readings(fuelVolume < (vehicle.getMaxFuelVolume()/10));
+	then
+	Alert $alert = new Alert();
+	$alert.setAdded(true);
+	$alert.setVin(readingsObject.getVin());
+	$alert.setPriority("MEDIUM");
+	$alert.setDescription("Fuel volume less than 10 percent of max fuel volume");
+	$alert.setTimestamp(readingsObject.getTimestamp());
+	$alert.setLatitude(readingsObject.getLatitude());
+	$alert.setLongitude(readingsObject.getLongitude());
+	alertList.add($alert);
+	end;
